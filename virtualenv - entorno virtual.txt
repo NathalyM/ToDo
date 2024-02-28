@@ -1,0 +1,52 @@
+virtualenv -> entorno virtual
+>create new terminal
+pip install virtualenv
+python -m virtualenv venv
+
+----- se puede llegar al entorno local de 2 formas
+1. ./venv/Scripts/activate
+2. >python select interpreter
+
+pip install django
+pip install djangorestframework
+#proyecto
+django-admin startproject todo .
+python manage.py runserver
+#control c
+#aplicacion
+python manage.py startapp projects
+#voy al proyecto-settings-installed_apps- agrego la aplicacion 'projects', y el modulo 'rest_framework'
+#agrego en projects-models.py la clase con mi modelo
+class Project(models.Model):
+    titulo = models.CharField(max_length=200)
+    comentario = models.TextField()
+    usuario = models.TextField()
+    fecha_crea =models.DateField(auto_now_add=True)
+
+#migro
+python manage.py makemigrations
+#para poder utilizar la migracion 
+python manage.py migrate
+#creo en project una carpeta llamada serializers.py que sirve para llamar un modelo especial de rest_framework
+#creo los campos y dejo el de fecha como solo lectura
+from rest_framework import serializers
+from .models import Project
+
+class ProjectSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = ('id','titulo','comentario','usuario','fecha_crea')
+        read_only_fields =('fecha_crea')
+
+#creo un archivo api.py con el fin de dar permisos
+from .models import Project
+from rest_framework import viewsets, permissions
+from .serializers import ProjectSerializers
+
+class ProjectViewSet(viewsets.ModelViewSet):
+    queryset = Project.objects.all()
+    permission_classes = [ permissions.AllowAny]
+    serializer_class = ProjectSerializers
+
+#inicializar
+git init
